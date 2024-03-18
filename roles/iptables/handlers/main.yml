@@ -1,0 +1,9 @@
+---
+# handlers file for iptables
+- name: restore iptables
+  shell: yes | iptables-apply 
+
+- name: restart netfilter-persisten
+  ansible.builtin.service:
+    name: netfilter-persisten
+    state: restarted

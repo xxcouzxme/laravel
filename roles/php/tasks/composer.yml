@@ -1,0 +1,38 @@
+- name: enshure necessary modules installed 
+  ansible.builtin.apt:
+    name: 
+      - php-mysql
+      - php-mbstring 
+      - php-tokenizer
+      - php-xml
+      - php-json 
+      - php-common
+
+      # - php{{php_version}}-mysql
+      # - php{{php_version}}-mbstring 
+      # - php{{php_version}}-tokenizer
+      # - php{{php_version}}-xml
+      # - php{{php_version}}-json 
+      # - php{{php_version}}-common
+    state: latest
+    update_cache: yes
+
+- name: check if composer is installed 
+  shell: yes | composer --version
+  register: composer_verify
+  ignore_errors: true
+
+- debug: msg="{{ composer_verify.rc }}"
+
+- name: all good 
+  ansible.builtin.debug:
+    msg: composer is installed 
+  when: composer_verify.rc == 0
+
+
+- name: install composer 
+  shell: "curl -sS https://getcomposer.org/installer -o composer-setup.php | php composer-setup.php --install-dir = /usr/bin/ --filename=composer"
+  args:
+    executable: /bin/bash
+    chdir: /tmp
+  when: composer_verify.rc != 0

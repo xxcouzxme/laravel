@@ -1,0 +1,7 @@
+---
+# defaults file for php
+php:
+  listen_path: /run/php/php-fpm.sock
+  memory_limit: 256M
+  install_composer: False
+php_version: latest

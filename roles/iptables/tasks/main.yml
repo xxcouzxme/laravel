@@ -1,0 +1,13 @@
+---
+- name: install iptables-persistent 
+  ansible.builtin.apt:
+    name: iptables-persistent
+    state: present
+    update_cache: yes
+
+- name: copy rules to remote 
+  template:
+    src: iptable.conf
+    dest: /etc/iptables/rules.v4 
+  notify:
+    - restart netfilter-persisten

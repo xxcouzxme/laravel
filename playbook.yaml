@@ -1,0 +1,12 @@
+- hosts: all
+  become: true
+  # gather_facts: false
+
+
+  roles:
+    - { role: users  }
+    - { role: nginx, tags: ["nginx"]  }
+    - { role: php, tags: ["php"] }
+    - { role: iptables, tags: ["iptables"]  }
+
+

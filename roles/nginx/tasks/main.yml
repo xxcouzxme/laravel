@@ -1,0 +1,53 @@
+#to do: need to add nginx repo
+
+#to do: make rollback after nginx_verify_config != 0
+
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: create nginx user 
+  user: 
+    name: nginx 
+    home: /usr/share/nginx/html
+    shell: /usr/sbin/nologin
+
+- name: enshure site folder exists 
+  ansible.builtin.file:
+    path: "{{nginx.site_root}}"
+    state: directory
+
+# - name: copy old confs 
+#   command: cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.back
+
+- name: copy conf to remote server 
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+
+- name: verify nginx config
+  command: nginx -t 
+  register: nginx_verify_config
+  # check_mode: no
+  changed_when: "nginx_verify_config.rc == 0"
+  notify:
+    - restart nginx 
+
+# - name: restore old confs 
+#   command: cp /etc/nginx/nginx.conf.back /etc/nginx/nginx.conf
+#   when: nginx_verify_config != 0
+
+- debug: msg="{{ nginx_verify_config.rc }}"
+
+- name: all good 
+  ansible.builtin.debug:
+    msg: nginx successfuly configured 
+  when: nginx_verify_config.rc == 0
+
+# - name: all ne good 
+#   ansible.builtin.debug:
+#     msg: nginx configuration restored 
+#   when: nginx_verify_config.rc != 0
+

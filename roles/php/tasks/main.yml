@@ -1,0 +1,48 @@
+---
+#to do add php version selection 
+- name: install necessary packs 
+  ansible.builtin.apt:
+    name: 
+      - software-properties-common 
+    state: present
+    update_cache: yes
+
+- name: install ondrej/php repository to obtane latest version  
+  ansible.builtin.apt_repository:
+    repo: ppa:ondrej/php
+  when: php_version == "latest"
+
+- name: create www-data user 
+  user: 
+    name: www-data 
+    home: /var/www
+    shell: /usr/sbin/nologin
+
+- name: install latest php
+  ansible.builtin.apt: 
+    name:
+      - php
+    state: latest
+    update_cache: yes
+  when: php_version == "latest"
+
+- name: register curent php version 
+  shell: "php -v | sed -n 1p | awk '{print$2}' | awk '{print$1+$2}'"
+  register: php_version
+  when: php_version == "latest"
+
+- name: register php-version 
+  ansible.builtin.set_fact: 
+    php_version: "{{ php_version.stdout }}"
+
+- name: php_version
+  debug: 
+    var: php_version
+
+####php-fpm 
+- include_tasks: php-fpm.yml
+
+- include_tasks: composer.yml
+  when: php.install_composer == True
+
+- include_tasks: laravel.yml 

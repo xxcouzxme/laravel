@@ -1,0 +1,26 @@
+---
+iptables:
+  input_ports:
+    - 80
+    - 443 
+  output_ports:
+    - 80
+    - 443 
+    - 3306
+
+nginx:
+  domain: server_name.ru
+  site_root: /var/www
+
+php:
+  listen_path: /run/php/php-fpm.sock
+  memory_limit: 128M
+  install_composer: True
+
+php_version: latest
+
+users:
+  - ubuntu
+
+
+

@@ -1,0 +1,6 @@
+---
+- name: create users 
+  user: 
+    name: "{{ item }}"
+#    create_home: True
+  loop: "{{ users }}"

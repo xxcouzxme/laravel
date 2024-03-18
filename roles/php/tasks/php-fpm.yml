@@ -1,0 +1,31 @@
+- name: install php-fpm latest version 
+  ansible.builtin.apt: 
+    name:
+      - php-fpm
+    state: latest
+    update_cache: yes
+
+- name: copy php.ini file 
+  template:
+    src: php.ini
+    dest: /etc/php/{{php_version}}/fpm/php.ini
+
+- name: copy php-fpm config file  
+  template:
+    src: php-fpm.conf
+    dest: /etc/php/{{php_version}}/fpm/pool.d/www.conf 
+
+- name: verify php-fpm config
+  command: php-fpm{{php_version}} -tt
+  register: php_fpm_verify_config
+  # check_mode: no
+  changed_when: "php_fpm_verify_config.rc == 0"
+  notify:
+    - restart nginx 
+
+- debug: msg="{{ php_fpm_verify_config.rc }}"
+
+- name: all good 
+  ansible.builtin.debug:
+    msg: php-fpm successfuly configured 
+  when: php_fpm_verify_config.rc == 0
