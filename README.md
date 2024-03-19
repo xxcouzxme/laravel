@@ -12,89 +12,107 @@ master - slave, где master работает в режиме read-writte, slav
 
 Для реализации данного метода с нуля необходимо:
    ### на master:
+   ```
 root@repl-master:~# sudo apt-get update
 root@repl-master:~# sudo apt-get install mysql-server mysql-client -y
 root@repl-master:~# sudo mysql_secure_installation
 
+```
 добавим в /etc/mysql/mysql.conf.d/mysqld.cnf:
+```
 server-id = 1
 log_bin = /var/log/mysql/mysql-bin.log
+```
 
 Создаем пользователя для подключения slave к master:
+```
 mysql> CREATE USER 'repl'@'%' IDENTIFIED BY 'slavepassword';
 mysql> GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
 mysql> FLUSH PRIVILEGES;
 mysql> FLUSH TABLES WITH READ LOCK;
-
+```
 Создаем дамп базы данных и отправляем его на slave server:
+```
 mysqldump -u root --all-databases --master-data > masterdump.sql
 scp masterdump.sql 10.11.12.102:
-
+```
 ### на slave
-
+```
 root@repl-slave:~# sudo apt-get install -y mysql-server
-
+```
 добавим в /etc/mysql/mysql.conf.d/mysqld.cnf:
+```
 server-id = 2
-
+```
 Задаем параметры того как подключается slave к master:
+```
 mysql> CHANGE MASTER TO
 mysql> MASTER_HOST='10.11.12.101',
 mysql> MASTER_USER='repl',
 mysql> MASTER_PASSWORD='slavepassword';
-
+```
 Вгружаем дамп базыЖ
+```
 root@repl-slave:~# mysql -uroot < masterdump.sql
-
+```
 Стартуем и проверяем статус репликации:
+```
 mysql> start slave;
 mysql> show slave status\G;
-
+```
 
 
 
 master - master, где master работает в режиме read-writte
 
 Добавим в /etc/mysql/mysql.conf.d/mysqld.cnf server1:
+```
 [mysqld]
 server-id=1
 log-bin="mysql-bin"
 auto-increment-offset = 1
-
+```
 Добавим в /etc/mysql/mysql.conf.d/mysqld.cnf server1:
+```
 [mysqld]
 server-id=2
 log-bin="mysql-bin"
 auto-increment-offset = 2
-
+```
 Создаем пользователя на 2 серверах:
 MySQL8 and Above
-
+```
 mysql> CREATE USER 'replicator'@'%' IDENTIFIED BY 'password';
 mysql> GRANT REPLICATION SLAVE ON *.* TO 'replicator'@'%';
-
+```
 Below MySQL8
+```
 mysql> GRANT REPLICATION SLAVE ON *.* TO 'replicator'@'%' IDENTIFIED BY 'password';
-
+```
 После того как команды выше выполнены на двух серверах выполняем на обоих серверах:
+```
 root@repl-server1:~# mysql -u replicator -p -h x.x.x.x -P 3306
-
+```
 Узнаем на какой позиции находится наш binlog на server1:
+```
 mysql> SHOW MASTER STATUS
-
+```
 на server2 заменяем MASTER_LOG_POS на тот который мы получили ранее:
+```
 mysql> STOP SLAVE;
 mysql> CHANGE MASTER TO MASTER_HOST = 'IP ADDRESS OF SERVER A', MASTER_USER = 'replicator', MASTER_PASSWORD = 'password', MASTER_LOG_FILE = 'mysql-bin.000003', MASTER_LOG_POS = 157, GET_MASTER_PUBLIC_KEY=1;
 mysql> START SLAVE;
-
+```
 Узнаем на какой позиции находится наш binlog на server2:
+```
 mysql> SHOW MASTER STATUS
-
+```
 на server1 заменяем MASTER_LOG_POS на тот который мы получили ранее:
+```
 mysql> STOP SLAVE;
 mysql> CHANGE MASTER TO MASTER_HOST = 'IP ADDRESS OF SERVER A', MASTER_USER = 'replicator', MASTER_PASSWORD = 'password', MASTER_LOG_FILE = 'mysql-bin.000003', MASTER_LOG_POS = 157, GET_MASTER_PUBLIC_KEY=1;
 mysql> START SLAVE;
-
+```
 ### Преимущества репликации master-master между master-slave:
 
 Высокая отказоустойчивость: Если один из мастеров выходит из строя, другой мастер может продолжать обслуживать запросы без простоев.
