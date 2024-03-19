@@ -16,7 +16,7 @@
 
 - name: enshure site folder exists 
   ansible.builtin.file:
-    path: "{{nginx.site_root}}"
+    path: "{{site_root}}"
     state: directory
 
 # - name: copy old confs 

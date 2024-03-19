@@ -1,4 +1,5 @@
 ---
 nginx:
   domain: "{{inventory_hostname}}"
-  site_root: /var/www
+
+site_root: /var/www/laravel

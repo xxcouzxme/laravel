@@ -31,7 +31,7 @@
 
 
 - name: install composer 
-  shell: "curl -sS https://getcomposer.org/installer -o composer-setup.php | php composer-setup.php --install-dir = /usr/bin/ --filename=composer"
+  shell: "curl -sS https://getcomposer.org/installer -o composer-setup.php | php composer-setup.php --install-dir=/usr/bin/ --filename=composer"
   args:
     executable: /bin/bash
     chdir: /tmp

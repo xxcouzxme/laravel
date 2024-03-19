@@ -7,7 +7,7 @@
 
 - name: copy rules to remote 
   template:
-    src: iptable.conf
+    src: iptables.conf
     dest: /etc/iptables/rules.v4 
   notify:
-    - restart netfilter-persisten
+    - restart netfilter-persistent

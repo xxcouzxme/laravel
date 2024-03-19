@@ -1,2 +1,4 @@
 ---
 # defaults file for users
+usfull_bins:
+  - vim 

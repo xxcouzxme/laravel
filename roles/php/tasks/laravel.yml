@@ -1,0 +1,55 @@
+- name: enshure site folder exists 
+  ansible.builtin.file:
+    path: "{{site_root}}"
+    state: directory
+
+- name: install laravel globally 
+  shell: yes | composer global require laravel/installer
+  # become_user: www-data
+
+# - name: get repo laravel repo form github 
+#   shell: git clone https://github.com/laravel/laravel.git -b {{laravel_version}} && php artisan serve
+#   args:
+#     executable: /bin/bash
+#     chdir: "{{site_root}}"
+#   when: laravel_version != "latest"
+
+# - name: check if repo is exists  
+#   stat: path=/tmp/laraver_repo
+#   register: laraver_repo_folder
+
+- name: get repo laravel repo form github 
+  shell: "git clone https://github.com/laravel/laravel.git {{site_root}}"
+  args:
+    executable: /bin/bash
+    chdir: /tmp
+  # become_user: www-data
+  ignore_errors: true
+  # when: laravel_version == "latest"
+
+- name: Recursively change ownership of a directory
+  ansible.builtin.file:
+    path: "{{site_root}}"
+    state: directory
+    recurse: yes
+    owner: www-data
+
+- name: copy env file to remote 
+  template:
+    src: laravel.env.j2
+    dest: "{{site_root}}/.env"
+    owner: www-data
+
+- name: php artisan serve 
+  shell: composer update
+  args:
+    executable: /bin/bash
+    chdir: "{{site_root}}"
+  become_user: www-data
+
+- name: do migration 
+  shell: php artisan migrate
+  args:
+    executable: /bin/bash
+    chdir: "{{site_root}}"
+  become_user: www-data

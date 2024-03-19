@@ -4,9 +4,10 @@
 
 
   roles:
-    - { role: users  }
-    - { role: nginx, tags: ["nginx"]  }
+    # - { role: users } #need work 
+    - { role: nginx, tags: ["nginx"] }
+    - { role: mysql_server, tags: ["mysql"] }
     - { role: php, tags: ["php"] }
-    - { role: iptables, tags: ["iptables"]  }
+    - { role: iptables, tags: ["iptables"] } 
 
 

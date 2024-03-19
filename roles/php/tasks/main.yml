@@ -22,6 +22,7 @@
   ansible.builtin.apt: 
     name:
       - php
+      - php-curl
     state: latest
     update_cache: yes
   when: php_version == "latest"
@@ -40,9 +41,13 @@
     var: php_version
 
 ####php-fpm 
-- include_tasks: php-fpm.yml
+- name: include php-fpm playbook
+  ansible.builtin.include_tasks: php-fpm.yml
 
-- include_tasks: composer.yml
+- name: include composer playbook 
+  ansible.builtin.include_tasks: composer.yml
   when: php.install_composer == True
 
-- include_tasks: laravel.yml 
+- name: include laravel playbook 
+  ansible.builtin.include_tasks: laravel.yml 
+  when: php.install_laravel == True

@@ -6,21 +6,46 @@ iptables:
   output_ports:
     - 80
     - 443 
-    - 3306
+
+users:
+  - name: ubuntu
+    sshkey: AAAAB3NzaC1yc2EAAAABIwAAAgEA0USmj/khKnAmpgeLVlbB6itFr+4/ok2z7sbtEKtZZY+19a3D7fE8F1PU5z1kWALIvRo7p/3kkEN8FCKv86cS8jCv82B5OXhAeLgU/oisCXsIrCvQMbPyUKl7bNx4u3BA8HjtCVsOE6zzzvKG6BXKdNTJqbDMNIY33CkDcj1uWo8Buh5WgUxjvnP5YBmqdPHX1I8E7QLL+d5H6bdUCPQ71URY2cmqvO4IoMwuxrOBJ3c9Ucsw3GCwaNHoPIEkOuTKpRbI951ovqkjDH9/PQgox0HFZ2G1srSS/fPrJizrhJTDjsj5OMFpxbpv0zptMosrStM0MFEBkHRzu6p7b/LHTcNtIHM6OQSqw7DG/07dfXXNrhiqyrZLYg019rYJxN+fOzEdm121aLw/SIOKOzVh3hQuVC7rq4yIdvZXu+W/RRKylYkChpWOsABWqjfCY/bMHpU0+PnFIbCoua/1ZoovTMXsYYtxto/6xGysuVovO0fxYFoxvk54K4TtnO59GCo9UUgQBC+HIqtUW3ycP2lOvjfA6iY3DPGYDvlSG8FhxcMVuWfZ3UYEiUfPYFqzuygf2RgUXI6gFtIHeqsO7kXQ1ii28yXM69rcNoTjD/xeb5u+42u+szwccAYcsXzn5C1BB0CGBhUtHzzUm9+Qiby03KvKgWl8287GIk1/9QlATYk=
+    groups: sudoer
+    create_home: True
+
+mysql_databases: 
+  - name: laravel_db
+    collation: utf8_general_ci
+    encoding: utf8
+
+mysql_users:
+  - name: laravel 
+    host: 127.0.0.1
+    password: FG$R72^8i6K(2@(DB
+    priv: "*.*:ALL"
 
 nginx:
   domain: server_name.ru
-  site_root: /var/www
+
+site_root: /var/www/laravel
 
 php:
   listen_path: /run/php/php-fpm.sock
   memory_limit: 128M
   install_composer: True
+  install_laravel: True
+
+# laravel_version: latest
+laravel_user: laravel
+laravel_db: laravel_db
+laravel_password: FG$R72^8i6K(2@(DB
 
 php_version: latest
 
-users:
-  - ubuntu
+usfull_bins:
+  - git 
+  - vim 
+
 
 
 

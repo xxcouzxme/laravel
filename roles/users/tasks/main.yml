@@ -1,6 +1,50 @@
 ---
-- name: create users 
-  user: 
+
+- name: Install usefull packs 
+  ansible.builtin.apt:
     name: "{{ item }}"
-#    create_home: True
-  loop: "{{ users }}"
+    state: present
+    update_cache: yes
+  loop: "{{ usfull_bins }}"
+
+# users:
+#   - name: ubuntu
+#     ssh-key: AAAAB3NzaC1yc2EAAAABIwAAAgEA0USmj/khKnAmpgeLVlbB6itFr+4/ok2z7sbtEKtZZY+19a3D7fE8F1PU5z1kWALIvRo7p/3kkEN8FCKv86cS8jCv82B5OXhAeLgU/oisCXsIrCvQMbPyUKl7bNx4u3BA8HjtCVsOE6zzzvKG6BXKdNTJqbDMNIY33CkDcj1uWo8Buh5WgUxjvnP5YBmqdPHX1I8E7QLL+d5H6bdUCPQ71URY2cmqvO4IoMwuxrOBJ3c9Ucsw3GCwaNHoPIEkOuTKpRbI951ovqkjDH9/PQgox0HFZ2G1srSS/fPrJizrhJTDjsj5OMFpxbpv0zptMosrStM0MFEBkHRzu6p7b/LHTcNtIHM6OQSqw7DG/07dfXXNrhiqyrZLYg019rYJxN+fOzEdm121aLw/SIOKOzVh3hQuVC7rq4yIdvZXu+W/RRKylYkChpWOsABWqjfCY/bMHpU0+PnFIbCoua/1ZoovTMXsYYtxto/6xGysuVovO0fxYFoxvk54K4TtnO59GCo9UUgQBC+HIqtUW3ycP2lOvjfA6iY3DPGYDvlSG8FhxcMVuWfZ3UYEiUfPYFqzuygf2RgUXI6gFtIHeqsO7kXQ1ii28yXM69rcNoTjD/xeb5u+42u+szwccAYcsXzn5C1BB0CGBhUtHzzUm9+Qiby03KvKgWl8287GIk1/9QlATYk=
+#     groups: sudoer
+#     create_home: True
+
+- name: Ensure group "sudoer" exists
+  ansible.builtin.group:
+    name: sudoer
+    state: present
+
+- name: create users
+  user:
+    name: "{{ item.name }}"
+    groups: "{{item.groups}}"
+  with_items: "{{ users }}"
+
+- name: Check if couchbase.host is already defined
+  lineinfile:
+    state: absent
+    path: "/home/{{item.name}}/.ssh"
+    regexp: "{{item.sshkey}}"
+  check_mode: true
+  changed_when: false
+  register: check
+  with_items: "{{ users }}"
+
+- name: Define couchbase.host if undefined
+  lineinfile:
+    state: present
+    path: "/home/{{item.name}}/.ssh"
+    line: "{{item.sshkey}}"
+  with_items: "{{ users }}"
+  when: check.found == 0
+
+- name: "Allow admin users to sudo without a password"
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: "present"
+    regexp: "^%sudoer"
+    line: "%sudoer ALL=(ALL) NOPASSWD: ALL"
